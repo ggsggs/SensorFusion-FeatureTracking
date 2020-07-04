@@ -59,7 +59,7 @@ void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descr
     double t = (double)cv::getTickCount();
     extractor->compute(img, keypoints, descriptors);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << descriptorType << " descriptor extraction in " << 1000 * t / 1.0 << " ms" << endl;
+    std::cout << descriptorType << " descriptor extraction in " << 1000 * t / 1.0 << " ms" << endl;
 }
 
 // Detect keypoints in image using the traditional Shi-Thomasi detector
@@ -89,7 +89,7 @@ void detKeypointsShiTomasi(vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool b
         keypoints.push_back(newKeyPoint);
     }
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "Shi-Tomasi detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    std::cout << "Shi-Tomasi detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
 
     // visualize results
     if (bVis) visKeypoints(img, keypoints, "Shi-Tomasi Corner Detector Results");
@@ -116,11 +116,39 @@ void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool
     nms(keypoints, dst_norm, 0, apertureSize, minResponse);
 
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "Harris detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    std::cout << "Harris detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
     // visualize results
     if (bVis) visKeypoints(img, keypoints, "Harris keypoint detector results");
 }
 
 void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, bool bVis) {
+//FAST, BRISK, ORB, AKAZE, SIFT
+cv::Ptr<cv::FeatureDetector> detector;
 
+if (detectorType.compare("FAST")) {
+    detector = cv::FastFeatureDetector::create(); 
+} else if (detectorType.compare("BRISK")) {
+    detector = cv::BRISK::create(); 
+} else if (detectorType.compare("ORB"))
+{
+    detector = cv::ORB::create();
+} else if (detectorType.compare("AKAZE"))
+{
+    detector = cv::AKAZE::create();
+} else if (detectorType.compare("SIFT"))
+{
+    detector = cv::SIFT::create();
+} else 
+{
+    std::cout << "\"" << detectorType << "\" not found, using FAST detector.";
+    detectorType = "FAST";
+    detector = cv::FastFeatureDetector::create();
+}
+
+double t = (double)cv::getTickCount();
+detector->detect(img, keypoints);
+t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+std::cout << detectorType << " detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+// visualize results
+if (bVis) visKeypoints(img, keypoints, detectorType + " keypoint detector results");
 }
