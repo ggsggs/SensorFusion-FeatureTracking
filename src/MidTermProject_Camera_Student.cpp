@@ -90,7 +90,7 @@ int main(int argc, const char *argv[])
         }
         else
         {
-            detKeypointsModern(keypoints, imgGray, detectorType, false);
+            detKeypointsModern(keypoints, imgGray, detectorType, true);
         }
         //// EOF STUDENT ASSIGNMENT
 
@@ -100,15 +100,25 @@ int main(int argc, const char *argv[])
         // only keep keypoints on the preceding vehicle
         bool bFocusOnVehicle = true;
         cv::Rect vehicleRect(535, 180, 180, 150);
+        std::vector<cv::KeyPoint> filteredKeypoints;
         if (bFocusOnVehicle)
         {
-            // ...
+            for (auto& kp : keypoints) {
+                auto x = kp.pt.x;
+                auto y = kp.pt.y;
+
+                if (x >= vehicleRect.x &&
+                    x <= vehicleRect.x + vehicleRect.width &&
+                    y >= vehicleRect.y &&
+                    y <= vehicleRect.y + vehicleRect.height)
+                    filteredKeypoints.push_back(kp);
+            }
         }
 
+        keypoints = std::move(filteredKeypoints);
         //// EOF STUDENT ASSIGNMENT
-
         // optional : limit number of keypoints (helpful for debugging and learning)
-        bool bLimitKpts = true;
+        bool bLimitKpts = false;
         if (bLimitKpts)
         {
             int maxKeypoints = 50;
