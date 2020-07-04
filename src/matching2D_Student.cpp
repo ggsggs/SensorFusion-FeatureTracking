@@ -40,7 +40,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
 void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
                    cv::Mat &descriptors, string descriptorType) {
   // select appropriate descriptor
-  cv::Ptr<cv::DescriptorExtractor> extractor;
+  cv::Ptr<cv::DescriptorExtractor> extractor;// BRIEF, ORB, FREAK, AKAZE, SIFT
   if (descriptorType.compare("BRISK") == 0) {
 
     int threshold = 30;        // FAST/AGAST detection threshold score.
@@ -49,9 +49,20 @@ void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
                                // sampling the neighbourhood of a keypoint.
 
     extractor = cv::BRISK::create(threshold, octaves, patternScale);
+  } else if (descriptorType.compare("BRIEF")) { //binary
+    extractor = cv::xfeatures2d::BriefDescriptorExtractor::create();
+  } else if (descriptorType.compare("ORB")) {
+    extractor = cv::ORB::create();
+  } else if (descriptorType.compare("FREAK")) {
+    extractor = cv::xfeatures2d::FREAK::create();
+  } else if (descriptorType.compare("AKAZE")) {
+    extractor = cv::AKAZE::create();
+  } else if (descriptorType.compare("SIFT")) {
+    extractor = cv::SIFT::create();
   } else {
-
-    //...
+    std::cout << "\"" << descriptorType << "\" not found, using BRISK descriptor.";
+    descriptorType = "BRISK";
+    extractor = cv::FastFeatureDetector::create();
   }
 
   // perform feature description
