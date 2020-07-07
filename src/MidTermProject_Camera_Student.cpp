@@ -56,6 +56,10 @@ int main(int argc, const char *argv[]) {
       descriptorType == "SIFT" ? "DES_HOG" : "DES_BINARY";
   string selectorType = "SEL_KNN"; // SEL_NN, SEL_KNN
 
+  if ((detectorType != "AKAZE" && descriptorType == "AKAZE") ||
+      (detectorType == "SIFT" && descriptorType == "ORB"))
+      throw "Wrong combination of detector and descriptor, terminating early";
+  
   Logger logger("summary", detectorType, descriptorType);
   /* MAIN LOOP OVER ALL IMAGES */
   for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex;

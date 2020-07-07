@@ -58,7 +58,8 @@ int main(int argc, const char *argv[]) {
        {"SHITOMASI", "HARRIS", "FAST", "BRISK", "ORB", "AKAZE", "SIFT"}) {
     for (const string &descriptorType :
          {"BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"}) {
-      if (detectorType != "AKAZE" && descriptorType == "AKAZE")
+      if ((detectorType != "AKAZE" && descriptorType == "AKAZE") ||
+          (detectorType == "SIFT" && descriptorType == "ORB"))
         continue;
       Logger logger("summary", detectorType, descriptorType);
       string descriptorCat =
