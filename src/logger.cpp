@@ -66,9 +66,10 @@ public:
 
     f.open(folder + "/" + detector_type + "_" + descriptor_type + ".csv", std::ios_base::trunc);
     f << "Det [ms], Descr [ms], num kp [#], num matched kp [#], mean neigh size [px], var neigh size [px]" << std::endl;
+    f << times_kp[0] << ", " <<  times_descriptor[0] << std::endl;
     for (size_t i = 0; i < num_kp.size(); i++) {
-      row_values = {times_kp[i], times_descriptor[i], static_cast<double>(num_kp[i]),static_cast<double>(num_matched_kp[i]), mean_neigh[i], var_neigh[i]};
-      f << vectorToRow(row_values).substr(1) << std::endl;
+      row_values = {times_kp[i+1], times_descriptor[i+1], static_cast<double>(num_kp[i]),static_cast<double>(num_matched_kp[i]), mean_neigh[i], var_neigh[i]};
+      f << vectorToRow(row_values).substr(2) << std::endl;
     }
     f.close();
   }

@@ -159,6 +159,8 @@ int main(int argc, const char *argv[]) {
 
     cout << "#3 : EXTRACT DESCRIPTORS done" << endl;
 
+    // TASK MP.9
+    logger.addTimes(tDet, tDes);
     // wait until at least two images have been processed
     if (dataBuffer.size() > 1) {
 
@@ -191,7 +193,6 @@ int main(int argc, const char *argv[]) {
       /// you have implemented.
       logger.analyzeKeypoints(keypoints);
       logger.countMatchedKeypoints(matches);
-      logger.addTimes(tDet, tDes);
       std::cout << "Num matched KPs: " << matches.size() << std::endl;
       // visualize matches between current and previous image
       bVis = true;

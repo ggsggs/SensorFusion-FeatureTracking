@@ -1,2 +1,4 @@
 Detector, Descriptor, Det time [ms], Des time [ms], KPs [#], Matched KPs [#], Mean Neigh Size [px], Variance Neigh Size [px]
 BRISK, ORB, 2.413126, 6.212733, 412.888889, 316.666667, 7.000000, 0.000000
+BRISK, ORB, 2.900626, 6.659327, 412.888889, 316.666667, 7.000000, 0.000000
+BRISK, ORB, 2.700997, 7.209429, 412.888889, 316.666667, 7.000000, 0.000000
