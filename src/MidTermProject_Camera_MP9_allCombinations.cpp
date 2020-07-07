@@ -58,10 +58,11 @@ int main(int argc, const char *argv[]) {
        {"SHITOMASI", "HARRIS", "FAST", "BRISK", "ORB", "AKAZE", "SIFT"}) {
     for (const string &descriptorType :
          {"BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"}) {
-
+      if (detectorType != "AKAZE" && descriptorType == "AKAZE")
+        continue;
       Logger logger("summary", detectorType, descriptorType);
       string descriptorCat =
-          descriptorType.compare("SIFT") == 0 ? "DES_HOG" : "DES_BINARY";
+          descriptorType == "SIFT" ? "DES_HOG" : "DES_BINARY";
       /* MAIN LOOP OVER ALL IMAGES */
       for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex;
            imgIndex++) {
@@ -97,9 +98,9 @@ int main(int argc, const char *argv[]) {
         vector<cv::KeyPoint> keypoints;
         //// TASK MP.2 - DONE
         double tDet;
-        if (detectorType.compare("SHITOMASI") == 0) {
+        if (detectorType == "SHITOMASI") {
           tDet = detKeypointsShiTomasi(keypoints, imgGray, bVis);
-        } else if (detectorType.compare("HARRIS") == 0) {
+        } else if (detectorType == "HARRIS") {
           tDet = detKeypointsHarris(keypoints, imgGray, bVis);
         } else {
           tDet = detKeypointsModern(keypoints, imgGray, detectorType, bVis);
@@ -126,7 +127,7 @@ int main(int argc, const char *argv[]) {
         if (bLimitKpts) {
           int maxKeypoints = 50;
 
-          if (detectorType.compare("SHITOMASI") == 0) {
+          if (detectorType == "SHITOMASI") {
             // there is no response info, so keep the first 50 as they are
             // sorted in descending quality order
             keypoints.erase(keypoints.begin() + maxKeypoints, keypoints.end());
