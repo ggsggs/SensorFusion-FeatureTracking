@@ -19,19 +19,24 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
     int normType = cv::NORM_HAMMING;
     matcher = cv::BFMatcher::create(normType, crossCheck);
   } else if (matcherType.compare("MAT_FLANN") == 0) {
-    // ...
+    if (descSource.type() != CV_32F ||
+        descRef.type() != CV_32F) { // OpenCV bug workaround : convert binary
+                                    // descriptors to floating point due to a
+                                    // bug in current OpenCV implementation
+      descSource.convertTo(descSource, CV_32F);
+      descRef.convertTo(descRef, CV_32F);
+    }
+
+    matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
   }
 
   // perform matching task
-  if (selectorType.compare("SEL_NN") == 0) { // nearest neighbor (best match)
-
-    matcher->match(
-        descSource, descRef,
-        matches); // Finds the best match for each descriptor in desc1
-  } else if (selectorType.compare("SEL_KNN") ==
-             0) { // k nearest neighbors (k=2)
-
-    // ...
+  // nearest neighbor (best match)
+  if (selectorType.compare("SEL_NN") == 0) {
+    // Finds the best match for each descriptor in desc1
+    matcher->match(descSource, descRef, matches);
+    // k nearest neighbors (k=2)
+  } else if (selectorType.compare("SEL_KNN") == 0) {
   }
 }
 
@@ -40,7 +45,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
 void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
                    cv::Mat &descriptors, string descriptorType) {
   // select appropriate descriptor
-  cv::Ptr<cv::DescriptorExtractor> extractor;// BRIEF, ORB, FREAK, AKAZE, SIFT
+  cv::Ptr<cv::DescriptorExtractor> extractor; // BRIEF, ORB, FREAK, AKAZE, SIFT
   if (descriptorType.compare("BRISK") == 0) {
 
     int threshold = 30;        // FAST/AGAST detection threshold score.
@@ -49,7 +54,7 @@ void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
                                // sampling the neighbourhood of a keypoint.
 
     extractor = cv::BRISK::create(threshold, octaves, patternScale);
-  } else if (descriptorType.compare("BRIEF")) { //binary
+  } else if (descriptorType.compare("BRIEF")) { // binary
     extractor = cv::xfeatures2d::BriefDescriptorExtractor::create();
   } else if (descriptorType.compare("ORB")) {
     extractor = cv::ORB::create();
@@ -58,9 +63,10 @@ void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
   } else if (descriptorType.compare("AKAZE")) {
     extractor = cv::AKAZE::create();
   } else if (descriptorType.compare("SIFT")) {
-    extractor = cv::SIFT::create();
+    extractor = cv::xfeatures2d::SIFT::create();
   } else {
-    std::cout << "\"" << descriptorType << "\" not found, using BRISK descriptor.";
+    std::cout << "\"" << descriptorType
+              << "\" not found, using BRISK descriptor.";
     descriptorType = "BRISK";
     extractor = cv::FastFeatureDetector::create();
   }
@@ -154,7 +160,7 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img,
   } else if (detectorType.compare("AKAZE")) {
     detector = cv::AKAZE::create();
   } else if (detectorType.compare("SIFT")) {
-    detector = cv::SIFT::create();
+    detector = cv::xfeatures2d::SIFT::create();
   } else {
     std::cout << "\"" << detectorType << "\" not found, using FAST detector.";
     detectorType = "FAST";
