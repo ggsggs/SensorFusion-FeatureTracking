@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <numeric>
 #include <opencv2/core.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -82,7 +83,7 @@ int main(int argc, const char *argv[]) {
 
     // extract 2D keypoints from current image
     vector<cv::KeyPoint>
-        keypoints;                // create empty feature list for current image
+        keypoints; // create empty feature list for current image
     string detectorType = "BRISK"; //// STUDENT ASSIGNMENT
     //// TASK MP.2 -> add the following keypoint detectors in file
     /// matching2D.cpp and enable string-based selection based on detectorType /
@@ -154,28 +155,25 @@ int main(int argc, const char *argv[]) {
 
     cout << "#3 : EXTRACT DESCRIPTORS done" << endl;
 
-    if (dataBuffer.size() >
-        1) // wait until at least two images have been processed
-    {
+    // wait until at least two images have been processed
+    if (dataBuffer.size() > 1) {
 
       /* MATCH KEYPOINT DESCRIPTORS */
-
       vector<cv::DMatch> matches;
-      string matcherType = "MAT_FLANN";        // MAT_BF, MAT_FLANN
-      string descriptorType = "DES_BINARY"; // DES_BINARY, DES_HOG
-      string selectorType = "SEL_KNN";       // SEL_NN, SEL_KNN
+      string matcherType = "MAT_FLANN"; // MAT_BF, MAT_FLANN
+      string descriptorCat =
+          descriptorType.compare("SIFT") == 0 ? "DES_HOG" : "DES_BINARY";
+      string selectorType = "SEL_KNN"; // SEL_NN, SEL_KNN
 
       //// STUDENT ASSIGNMENT
       //// TASK MP.5 -> add FLANN matching in file matching2D.cpp
       //// TASK MP.6 -> add KNN match selection and perform descriptor distance
       /// ratio filtering with t=0.8 in file matching2D.cpp
-
       matchDescriptors((dataBuffer.end() - 2)->keypoints,
                        (dataBuffer.end() - 1)->keypoints,
                        (dataBuffer.end() - 2)->descriptors,
                        (dataBuffer.end() - 1)->descriptors, matches,
-                       descriptorType, matcherType, selectorType);
-
+                       descriptorCat, matcherType, selectorType);
       //// EOF STUDENT ASSIGNMENT
 
       // store matches in current data frame
@@ -183,6 +181,26 @@ int main(int argc, const char *argv[]) {
 
       cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << endl;
 
+      //// TASK MP.7 Your seventh task is to count the number of keypoints on
+      /// the preceding vehicle for all 10 images and take note of the
+      /// distribution of their neighborhood size. Do this for all the detectors
+      /// you have implemented.
+      int num_keypoints = keypoints.size();
+      double mean = std::accumulate(keypoints.begin(), keypoints.end(), 0.0,
+                                    [](double t, const cv::KeyPoint &kp) {
+                                      return t + kp.size;
+                                    }) /
+                    keypoints.size();
+      double variance =
+          std::accumulate(keypoints.begin(), keypoints.end(), 0.0,
+                          [mean](double sum, const cv::KeyPoint &kp) {
+                            return sum + pow(kp.size - mean, 2);
+                          }) /
+          (keypoints.size() - 1);
+
+      std::cout << "Num KPs: " << num_keypoints
+                << " - Neighborhood size with mean=" << mean
+                << " and var=" << variance << std::endl;
       // visualize matches between current and previous image
       bVis = true;
       if (bVis) {
