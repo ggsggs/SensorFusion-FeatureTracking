@@ -10,7 +10,6 @@
 using std::string;
 using std::vector;
 
-
 class Logger {
 public:
   Logger(string fn, string detType, string desType)
@@ -50,25 +49,33 @@ public:
   void writeCSV() {
     std::ofstream f;
     f.open(folder + "/" + filename + ".csv", std::ios_base::app);
-    vector<double> row_values{getMean(times_kp), getMean(times_descriptor),
-                              getMean(num_kp), getMean(num_matched_kp), getMean(mean_neigh),
-                              getMean(var_neigh)};
+    vector<double> row_values{getMean(times_kp),   getMean(times_descriptor),
+                              getMean(num_kp),     getMean(num_matched_kp),
+                              getMean(mean_neigh), getMean(var_neigh)};
 
-    auto vectorToRow = [](vector<double>& v){
-      return std::accumulate(
-        v.begin(), v.end(),
-        string{}, [](std::string t, double e) {
-          return std::move(t) + ", " + std::to_string(e);
-        });
+    auto vectorToRow = [](vector<double> &v) {
+      return std::accumulate(v.begin(), v.end(), string{},
+                             [](std::string t, double e) {
+                               return std::move(t) + ", " + std::to_string(e);
+                             });
     };
-    f << detector_type + ", " + descriptor_type + vectorToRow(row_values) << std::endl;
+    f << detector_type + ", " + descriptor_type + vectorToRow(row_values)
+      << std::endl;
     f.close();
 
-    f.open(folder + "/" + detector_type + "_" + descriptor_type + ".csv", std::ios_base::trunc);
-    f << "Det [ms], Descr [ms], num kp [#], num matched kp [#], mean neigh size [px], var neigh size [px]" << std::endl;
-    f << times_kp[0] << ", " <<  times_descriptor[0] << std::endl;
+    f.open(folder + "/" + detector_type + "_" + descriptor_type + ".csv",
+           std::ios_base::trunc);
+    f << "Det [ms], Descr [ms], num kp [#], num matched kp [#], mean neigh "
+         "size [px], var neigh size [px]"
+      << std::endl;
+    f << times_kp[0] << ", " << times_descriptor[0] << std::endl;
     for (size_t i = 0; i < num_kp.size(); i++) {
-      row_values = {times_kp[i+1], times_descriptor[i+1], static_cast<double>(num_kp[i]),static_cast<double>(num_matched_kp[i]), mean_neigh[i], var_neigh[i]};
+      row_values = {times_kp[i + 1],
+                    times_descriptor[i + 1],
+                    static_cast<double>(num_kp[i]),
+                    static_cast<double>(num_matched_kp[i]),
+                    mean_neigh[i],
+                    var_neigh[i]};
       f << vectorToRow(row_values).substr(2) << std::endl;
     }
     f.close();
