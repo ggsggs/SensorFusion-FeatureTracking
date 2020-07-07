@@ -69,7 +69,7 @@ public:
       << std::endl;
     f.close();
 
-    f.open(folder + "/" + detector_type + "_" + descriptor_type + ".csv",
+    f.open(folder + "/detector_descriptor_stats/" + detector_type + "_" + descriptor_type + ".csv",
            std::ios_base::trunc);
     f << "Total time [ms], Det [ms], Descr [ms], num kp [#], num matched kp "
          "[#], mean neigh "
