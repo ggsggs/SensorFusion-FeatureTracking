@@ -16,6 +16,7 @@
 
 #include "dataStructures.h"
 #include "matching2D.hpp"
+#include "logger.cpp"
 
 using namespace std;
 
@@ -47,6 +48,10 @@ int main(int argc, const char *argv[]) {
 
   /* MAIN LOOP OVER ALL IMAGES */
 
+
+  string detectorType = "BRISK"; //SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
+  string descriptorType = "ORB"; // BRIEF, ORB, FREAK, AKAZE, SIFT
+  Logger logger("summary", detectorType, descriptorType); 
   for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex;
        imgIndex++) {
     /* LOAD IMAGE INTO BUFFER */
@@ -84,17 +89,18 @@ int main(int argc, const char *argv[]) {
     // extract 2D keypoints from current image
     vector<cv::KeyPoint>
         keypoints; // create empty feature list for current image
-    string detectorType = "BRISK"; //// STUDENT ASSIGNMENT
+    
     //// TASK MP.2 -> add the following keypoint detectors in file
     /// matching2D.cpp and enable string-based selection based on detectorType /
-    ///-> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
+    //// STUDENT ASSIGNMENT
 
+    double tDet;
     if (detectorType.compare("SHITOMASI") == 0) {
-      detKeypointsShiTomasi(keypoints, imgGray, false);
+      tDet = detKeypointsShiTomasi(keypoints, imgGray, false);
     } else if (detectorType.compare("HARRIS") == 0) {
-      detKeypointsHarris(keypoints, imgGray, false);
+      tDet = detKeypointsHarris(keypoints, imgGray, false);
     } else {
-      detKeypointsModern(keypoints, imgGray, detectorType, true);
+      tDet = detKeypointsModern(keypoints, imgGray, detectorType, true);
     }
     //// EOF STUDENT ASSIGNMENT
 
@@ -115,7 +121,6 @@ int main(int argc, const char *argv[]) {
           filteredKeypoints.push_back(kp);
       }
     }
-
     keypoints = std::move(filteredKeypoints);
     //// EOF STUDENT ASSIGNMENT
     // optional : limit number of keypoints (helpful for debugging and learning)
@@ -144,8 +149,7 @@ int main(int argc, const char *argv[]) {
     /// FREAK, AKAZE, SIFT
 
     cv::Mat descriptors;
-    string descriptorType = "ORB"; // BRIEF, ORB, FREAK, AKAZE, SIFT
-    descKeypoints((dataBuffer.end() - 1)->keypoints,
+    double tDes = descKeypoints((dataBuffer.end() - 1)->keypoints,
                   (dataBuffer.end() - 1)->cameraImg, descriptors,
                   descriptorType);
     //// EOF STUDENT ASSIGNMENT
@@ -160,7 +164,7 @@ int main(int argc, const char *argv[]) {
 
       /* MATCH KEYPOINT DESCRIPTORS */
       vector<cv::DMatch> matches;
-      string matcherType = "MAT_FLANN"; // MAT_BF, MAT_FLANN
+      string matcherType = "MAT_BF"; // MAT_BF, MAT_FLANN
       string descriptorCat =
           descriptorType.compare("SIFT") == 0 ? "DES_HOG" : "DES_BINARY";
       string selectorType = "SEL_KNN"; // SEL_NN, SEL_KNN
@@ -185,22 +189,10 @@ int main(int argc, const char *argv[]) {
       /// the preceding vehicle for all 10 images and take note of the
       /// distribution of their neighborhood size. Do this for all the detectors
       /// you have implemented.
-      int num_keypoints = keypoints.size();
-      double mean = std::accumulate(keypoints.begin(), keypoints.end(), 0.0,
-                                    [](double t, const cv::KeyPoint &kp) {
-                                      return t + kp.size;
-                                    }) /
-                    keypoints.size();
-      double variance =
-          std::accumulate(keypoints.begin(), keypoints.end(), 0.0,
-                          [mean](double sum, const cv::KeyPoint &kp) {
-                            return sum + pow(kp.size - mean, 2);
-                          }) /
-          (keypoints.size() - 1);
-
-      std::cout << "Num KPs: " << num_keypoints
-                << " - Neighborhood size with mean=" << mean
-                << " and var=" << variance << std::endl;
+      logger.analyzeKeypoints(keypoints);
+      logger.countMatchedKeypoints(matches);
+      logger.addTimes(tDet, tDes);
+      std::cout << "Num matched KPs: " << matches.size() << std::endl;
       // visualize matches between current and previous image
       bVis = true;
       if (bVis) {
@@ -221,8 +213,8 @@ int main(int argc, const char *argv[]) {
       }
       bVis = false;
     }
-
   } // eof loop over all images
+  logger.writeCSV();
 
   return 0;
 }

@@ -61,7 +61,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
 
 // Use one of several types of state-of-art descriptors to uniquely identify
 // keypoints
-void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
+double descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
                    cv::Mat &descriptors, string descriptorType) {
   // select appropriate descriptor
   cv::Ptr<cv::DescriptorExtractor> extractor; // BRIEF, ORB, FREAK, AKAZE, SIFT
@@ -96,10 +96,11 @@ void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
   t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
   std::cout << descriptorType << " descriptor extraction in " << 1000 * t / 1.0
             << " ms" << endl;
+  return t*1000;
 }
 
 // Detect keypoints in image using the traditional Shi-Thomasi detector
-void detKeypointsShiTomasi(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
+double detKeypointsShiTomasi(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
                            bool bVis) {
   // compute detector parameters based on image size
   int blockSize = 4; //  size of an average block for computing a derivative
@@ -133,9 +134,10 @@ void detKeypointsShiTomasi(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
   // visualize results
   if (bVis)
     visKeypoints(img, keypoints, "Shi-Tomasi Corner Detector Results");
+  return t * 1000.0;
 }
 
-void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img,
+double detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img,
                         bool bVis) {
   // solution from cornerness_harris.cpp, lesson 4.2
   // Detector parameters
@@ -160,12 +162,15 @@ void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img,
   t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
   std::cout << "Harris detection with n=" << keypoints.size()
             << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    
   // visualize results
   if (bVis)
     visKeypoints(img, keypoints, "Harris keypoint detector results");
+
+  return t*1000.0;
 }
 
-void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img,
+double detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img,
                         std::string detectorType, bool bVis) {
   // FAST, BRISK, ORB, AKAZE, SIFT
   cv::Ptr<cv::FeatureDetector> detector;
@@ -194,4 +199,5 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img,
   // visualize results
   if (bVis)
     visKeypoints(img, keypoints, detectorType + " keypoint detector results");
+  return t*1000.0;
 }
